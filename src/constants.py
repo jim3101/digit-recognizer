@@ -1,0 +1,7 @@
+PATH_TO_TRAIN_DATA = '../data/train.csv'
+PATH_TO_TEST_DATA = '../data/test.csv'
+PATH_TO_RESULTS = '../data/results.csv'
+START_LEARNING_RATE = 0.001
+MIN_LEARNING_RATE = 0.0001
+BATCH_SIZE = 32
+EPOCHS = 30
