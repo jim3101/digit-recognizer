@@ -28,14 +28,16 @@ class CNN():
             Dense(128, activation='relu'),
             Dense(10)
         ])
-        self.results = None
 
     def compile_model(self):
         opt = Adam(learning_rate=START_LEARNING_RATE)
         loss_fn = SparseCategoricalCrossentropy(from_logits=True)
         self.cnn.compile(optimizer=opt, loss=loss_fn, metrics=['accuracy'])
 
-    def train_model(self, digits, labels):
+    def train_model(self, train_data_preprocessor):
+        digits = train_data_preprocessor.get_digits()
+        labels = train_data_preprocessor.get_labels()
+
         reduce_lr = ReduceLROnPlateau(monitor='loss',
                                       factor=0.5,
                                       patience=3,
@@ -48,11 +50,14 @@ class CNN():
                      epochs=EPOCHS,
                      callbacks=[reduce_lr])
 
-    def evaluate_model(self, test_digits):
-        self.results = self.cnn.predict(test_digits)
+    def evaluate_model(self, test_data_preprocessor):
+        test_digits = test_data_preprocessor.get_digits()
+        results = self.cnn.predict(test_digits)
+        self.store_results(results)
 
-    def store_results(self):
+    @staticmethod
+    def store_results(results):
         results_df = pd.DataFrame(columns=['ImageId', 'Label'])
-        results_df['Label'] = np.argmax(self.results, axis=1)
-        results_df['ImageId'] = np.arange(1, len(self.results)+1)
+        results_df['Label'] = np.argmax(results, axis=1)
+        results_df['ImageId'] = np.arange(1, len(results)+1)
         results_df.to_csv(PATH_TO_RESULTS, index=False)

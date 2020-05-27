@@ -1,17 +1,19 @@
-from data_preprocessing import get_train_data, get_test_data
+from data_preprocessing import DataPreprocessor
 from cnn import CNN
 
 
 def main():
+    train_data_preprocessor = DataPreprocessor(dataset='train')
+    test_data_preprocessor = DataPreprocessor(dataset='test')
+
+    train_data_preprocessor.preprocess()
+    test_data_preprocessor.preprocess()
+
     cnn = CNN()
     cnn.init_model()
     cnn.compile_model()
-    digits, labels = get_train_data()
-    cnn.train_model(digits, labels)
-
-    test_digits = get_test_data()
-    cnn.evaluate_model(test_digits)
-    cnn.store_results()
+    cnn.train_model(train_data_preprocessor)
+    cnn.evaluate_model(test_data_preprocessor)
     print('done')
 
 if __name__ == '__main__':

@@ -3,38 +3,47 @@ import numpy as np
 from constants import PATH_TO_TRAIN_DATA, PATH_TO_TEST_DATA
 
 
-def load_raw_data(path_to_data):
-    return pd.read_csv(path_to_data)
+class DataPreprocessor():
 
-def split_digits_and_labels(raw_data):
-    digits = raw_data.loc[:, 'pixel0':]
-    labels = raw_data.loc[:, 'label']
-    return digits, labels
+    def __init__(self, dataset='train'):
+        if dataset == 'train':
+            self.data = self.load_raw_data(PATH_TO_TRAIN_DATA)
+        elif dataset == 'test':
+            self.data = self.load_raw_data(PATH_TO_TEST_DATA)
 
-def reshape_digits(digits):
-    return digits.reshape(digits.shape[0], 28, 28, 1)
+        self.dataset = dataset
+        self.digits = None
+        self.labels = None
+        self.preprocessing_done = False
 
-def rescale_digits(digits):
-    return digits / np.max(digits)
+    @staticmethod
+    def load_raw_data(path_to_data):
+        return pd.read_csv(path_to_data)
 
-def get_train_data():
-    raw_data = load_raw_data(PATH_TO_TRAIN_DATA)
-    digits, labels = split_digits_and_labels(raw_data)
+    def preprocess(self):
+        if self.dataset == 'train':
+            self.split_digits_and_labels()
+        elif self.dataset == 'test':
+            self.digits = self.data.values
 
-    # Pandas dataframe to numpy
-    digits = digits.values
-    labels = labels.values
+        self.reshape_digits()
+        self.rescale_digits()
+        self.preprocessing_done = True
 
-    digits = reshape_digits(digits)
-    digits = rescale_digits(digits)
-    return digits, labels
+    def split_digits_and_labels(self):
+        self.digits = self.data.loc[:, 'pixel0':].values
+        self.labels = self.data.loc[:, 'label'].values
 
-def get_test_data():
-    raw_data = load_raw_data(PATH_TO_TEST_DATA)
+    def reshape_digits(self):
+        self.digits = self.digits.reshape(self.digits.shape[0], 28, 28, 1)
 
-    # Pandas dataframe to numpy
-    test_digits = raw_data.values
+    def rescale_digits(self):
+        self.digits = self.digits / np.max(self.digits)
 
-    test_digits = reshape_digits(test_digits)
-    test_digits = rescale_digits(test_digits)
-    return test_digits
+    def get_digits(self):
+        assert self.preprocessing_done
+        return self.digits
+
+    def get_labels(self):
+        assert self.preprocessing_done
+        return self.labels
